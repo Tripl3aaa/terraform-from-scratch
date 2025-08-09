@@ -12,13 +12,15 @@ terraform {
 provider "azurerm" {
   features {
   }
+  subscription_id = "6327b144-9243-42e4-bbcb-694605ebb2b8"
+  tenant_id = "5d76dbbc-eb4b-439c-ae33-53ccd0607a30"
 }
 
 #Creando un resource group 
 resource "azurerm_resource_group" "project1" {
   name     = "wazuh_resource_group"
   location = "East Us"
-  tags     = { "Enviroment" = "dev" }
+  tags     = { "Environment" = "dev" }
 }
 
 #Creando virtual networks de la parte web
@@ -223,5 +225,3 @@ resource "azurerm_private_dns_zone_virtual_network_link" "vnetnva" {
   private_dns_zone_name = azurerm_private_dns_zone.PrivateDns.name
   virtual_network_id    = azurerm_virtual_network.project1vnetweb.id
 }
-
-#
