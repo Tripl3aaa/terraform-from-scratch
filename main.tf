@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "2.0.0"
+      version = "2.76.0"
     }
   }
 }
@@ -18,7 +18,7 @@ provider "azurerm" {
 
 #Creando un resource group 
 resource "azurerm_resource_group" "project1" {
-  name     = "wazuh_resource_group"
+  name     = "Learning-Terraform"
   location = "East Us"
   tags     = { "Environment" = "dev" }
 }
@@ -34,7 +34,7 @@ resource "azurerm_virtual_network" "project1vnetweb" {
 
 #Creando la subnet donde pertenece la parte web
 resource "azurerm_subnet" "project1vnetweb1" {
-  name                 = "default"
+  name                 = "defaultvnetweb"
   resource_group_name  = azurerm_resource_group.project1.name
   virtual_network_name = azurerm_virtual_network.project1vnetweb.name
   address_prefix       = "192.168.1.0/24"
@@ -49,7 +49,7 @@ resource "azurerm_network_interface" "project1vnetweb" {
     subnet_id                     = azurerm_subnet.project1vnetweb1.id
     private_ip_address_allocation = "Static"
     private_ip_address_version    = "IPv4"
-    private_ip_address            = "192.168.0.5"
+    private_ip_address            = "192.168.0.10"
   }
 }
 
@@ -58,16 +58,16 @@ resource "azurerm_virtual_network" "project1vnetbackend" {
   name                = "vnetbackend"
   resource_group_name = azurerm_resource_group.project1.name
   location            = azurerm_resource_group.project1.location
-  address_space       = ["172.16.0.0/21"]
+  address_space       = ["172.16.0.0/16"]
   tags                = { "Enviroment" = "dev" }
 }
 
 #Creando la subnet donde pertenece la parte del manager (backend)
 resource "azurerm_subnet" "project1vnetbackend1" {
-  name                 = "default"
+  name                 = "defaultbackend"
   resource_group_name  = azurerm_resource_group.project1.name
   virtual_network_name = azurerm_virtual_network.project1vnetweb.name
-  address_prefix       = "172.16.0.0/24"
+  address_prefix       = "172.16.0.0/21"
 }
 
 #Creando la NIC
@@ -80,7 +80,7 @@ resource "azurerm_network_interface" "project1vnetbackend" {
     subnet_id                     = azurerm_subnet.project1vnetbackend1.id
     private_ip_address_allocation = "Static"
     private_ip_address_version    = "IPv4"
-    private_ip_address            = "172.16.0.5"
+    private_ip_address            = "172.16.0.10"
   }
 }
 # Creando la Virtual Network del NVA y el vpn gateway
@@ -88,15 +88,15 @@ resource "azurerm_virtual_network" "project1nva" {
   name                = "vnetnva"
   resource_group_name = azurerm_resource_group.project1.name
   location            = azurerm_resource_group.project1.location
-  address_space       = ["10.0.0.0/21"]
+  address_space       = ["10.0.0.0/16"]
   tags                = { "Enviroment" = "dev" }
 }
 #Creando la subred 
 resource "azurerm_subnet" "project1nva1" {
-  name                 = "default"
+  name                 = "defaultnva"
   resource_group_name  = azurerm_resource_group.project1.name
   virtual_network_name = azurerm_virtual_network.project1nva.name
-  address_prefix       = "10.0.0.0/24"
+  address_prefix       = "10.0.0.0/21"
 }
 
 #Creando la interfaz NIC
@@ -109,7 +109,7 @@ resource "azurerm_network_interface" "project1vnetnva" {
     subnet_id                     = azurerm_subnet.project1nva1.id
     private_ip_address_allocation = "Static"
     private_ip_address_version    = "IPv4"
-    private_ip_address            = "10.0.0.5"
+    private_ip_address            = "10.0.0.10"
   }
 }
 
@@ -126,7 +126,7 @@ resource "azurerm_network_security_group" "vnetweb" {
 # Asociar NSG a web vnet
 resource "azurerm_subnet_network_security_group_association" "vnetweb1" {
   subnet_id                 = azurerm_subnet.project1vnetweb1.id
-  network_security_group_id = azurerm_network_security_group.vnetweb
+  network_security_group_id = azurerm_network_security_group.vnetweb.id
 }
 
 # Creating NSG for vnetbackend
@@ -178,7 +178,7 @@ resource "azurerm_route" "route_2" {
   name                = "backend-to-web"
   resource_group_name = azurerm_resource_group.project1.name
   route_table_name    = azurerm_route_table.routingtable1.name
-  address_prefix      = "172.16.0.0/24"
+  address_prefix      = "172.16.0.0/21"
   next_hop_type       = "VirtualAppliance"
 }
 
