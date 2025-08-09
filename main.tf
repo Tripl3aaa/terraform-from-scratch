@@ -12,8 +12,7 @@ terraform {
 provider "azurerm" {
   features {
   }
-  subscription_id = "6327b144-9243-42e4-bbcb-694605ebb2b8"
-  tenant_id = "5d76dbbc-eb4b-439c-ae33-53ccd0607a30"
+  subscription_id = var.subscription_id
 }
 
 #Creando un resource group 
